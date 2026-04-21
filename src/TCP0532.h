@@ -1,4 +1,4 @@
-// src/TCP0532.h v2
+// src/TCP0532.h v3
 #pragma once
 
 #if defined(ARDUINO)
@@ -7,6 +7,7 @@
 #else
 #include <stdint.h>
 struct BBI2C;
+bool tcp0532HostBeginBus(BBI2C& bus);
 #endif
 
 static constexpr uint8_t TCP0532_DEFAULT_I2C_ADDRESS = 0x24;
@@ -30,4 +31,4 @@ class TCP0532 {
   const char* lastError_;
   bool ready_;
 };
-// src/TCP0532.h v2
+// src/TCP0532.h v3

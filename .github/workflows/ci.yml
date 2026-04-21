@@ -1,3 +1,4 @@
+# .github/workflows/ci.yml v2
 name: CI
 
 on:
@@ -17,26 +18,51 @@ jobs:
           - arduino:renesas_uno:unor4wifi
 
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v5
+      - name: Check out TCP0532
+        uses: actions/checkout@v4
+        with:
+          path: TCP0532
+
+      - name: Check out TCP1819
+        uses: actions/checkout@v4
+        with:
+          repository: egp/TCP1819
+          path: TCP1819
 
       - name: Install Arduino CLI
         run: |
-          set -euo pipefail
-          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR=/usr/local/bin sh
-          arduino-cli version
+          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
+          echo "$PWD/bin" >> "$GITHUB_PATH"
 
       - name: Update core index
         run: arduino-cli core update-index
 
-      - name: Install required cores
-        run: |
-          arduino-cli core install arduino:avr
-          arduino-cli core install arduino:renesas_uno
+      - name: Install AVR core
+        run: arduino-cli core install arduino:avr
+
+      - name: Install Renesas UNO core
+        run: arduino-cli core install arduino:renesas_uno
 
       - name: Compile ReaderAlive
+        working-directory: TCP0532
         run: |
           arduino-cli compile \
             --fqbn "${{ matrix.fqbn }}" \
             --library . \
+            --library ../TCP1819 \
             examples/ReaderAlive
+
+  host-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out TCP0532
+        uses: actions/checkout@v4
+        with:
+          path: TCP0532
+
+      - name: Run host tests
+        working-directory: TCP0532
+        run: |
+          make clean test
+# .github/workflows/ci.yml v2

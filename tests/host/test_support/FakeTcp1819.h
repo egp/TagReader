@@ -1,5 +1,9 @@
-// tests/host/test_support/FakeTcp1819.h v1
+// tests/host/test_support/FakeTcp1819.h v2
 #pragma once
 
 struct BBI2C {};
-// tests/host/test_support/FakeTcp1819.h v1
+
+void fakeTcp1819Reset();
+void fakeTcp1819SetBeginResult(bool result);
+int fakeTcp1819BeginCallCount();
+// tests/host/test_support/FakeTcp1819.h v2

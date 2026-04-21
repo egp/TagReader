@@ -1,9 +1,10 @@
-# Makefile v2
+# Makefile v5
 ARDUINO_CLI ?= arduino-cli
 CXX ?= c++
 CXXFLAGS ?= -std=c++17 -Wall -Wextra -Werror -pedantic
 
 LIBRARY_DIR ?= .
+TCP1819_DIR ?=
 EXAMPLE ?= examples/ReaderAlive
 FQBN ?= arduino:avr:uno
 BUILD_DIR ?= build
@@ -15,6 +16,7 @@ ALL_FQBNS := \
 	arduino:renesas_uno:unor4wifi
 
 HOST_TEST_SOURCES := $(sort $(wildcard tests/host/test_*.cpp))
+HOST_TEST_SUPPORT_SOURCES := $(sort $(wildcard tests/host/test_support/*.cpp))
 HOST_TEST_BINS := $(patsubst tests/host/%.cpp,$(HOST_BUILD_DIR)/%,$(HOST_TEST_SOURCES))
 
 .PHONY: help compile compile-all test clean core-update core-install-avr core-install-renesas
@@ -32,12 +34,18 @@ help:
 	@echo "Variables:"
 	@echo "  EXAMPLE=<path>          default: examples/ReaderAlive"
 	@echo "  FQBN=<fqbn>             default: arduino:avr:uno"
+	@echo "  TCP1819_DIR=<path>      optional extra library path"
 
 compile:
 	@mkdir -p "$(BUILD_DIR)"
-	@$(ARDUINO_CLI) compile \
+	@extra_lib_flags=''; \
+	if [ -n "$(TCP1819_DIR)" ]; then \
+		extra_lib_flags="--library $(TCP1819_DIR)"; \
+	fi; \
+	$(ARDUINO_CLI) compile \
 		--fqbn "$(FQBN)" \
 		--library "$(LIBRARY_DIR)" \
+		$$extra_lib_flags \
 		--build-path "$(BUILD_DIR)/$$(echo '$(FQBN)' | tr ':' '_')" \
 		"$(EXAMPLE)"
 
@@ -45,7 +53,7 @@ compile-all:
 	@set -e; \
 	for fqbn in $(ALL_FQBNS); do \
 		echo "Compiling $(EXAMPLE) for $$fqbn"; \
-		$(MAKE) --no-print-directory compile FQBN=$$fqbn; \
+		$(MAKE) --no-print-directory compile FQBN=$$fqbn TCP1819_DIR="$(TCP1819_DIR)"; \
 	done
 
 test: $(HOST_TEST_BINS)
@@ -55,7 +63,7 @@ test: $(HOST_TEST_BINS)
 		"$$test_bin"; \
 	done
 
-$(HOST_BUILD_DIR)/test_%: tests/host/test_%.cpp src/TCP0532.cpp
+$(HOST_BUILD_DIR)/test_%: tests/host/test_%.cpp src/TCP0532.cpp $(HOST_TEST_SUPPORT_SOURCES)
 	@mkdir -p "$(HOST_BUILD_DIR)"
 	@$(CXX) $(CXXFLAGS) \
 		-I./src \
@@ -74,4 +82,4 @@ core-install-avr:
 
 core-install-renesas:
 	$(ARDUINO_CLI) core install arduino:renesas_uno
-# Makefile v2
+# Makefile v5
