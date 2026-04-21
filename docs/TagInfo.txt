@@ -1,0 +1,56 @@
+That does narrow it. I’m checking whether those fields let us pin down the exact EV1 memory variant and what they imply about the likely protocol path on Arduino.
+
+Thought for 48s
+
+Yes. That narrows it quite a bit.
+
+What your TagInfo fields now suggest
+
+Taken together, your readout is consistent with a MIFARE Plus EV1, 2 KB variant, 7-byte UID, 17 pF antenna-capacitance version. The “2048 Bytes” is the key clue for the 2 KB size, and the “17 pF” field is best interpreted as the chip’s input/resonance capacitance variant, which matters for antenna/card design, not for how you parse the application data. NXP uses that same 17 pF / 70 pF distinction across MIFARE product variants.
+
+Your UID 0x04241E12261290 is 7 bytes, which also fits a common MIFARE Plus packaging/configuration pattern. NXP’s product families and parametric listings include 2 KB and 4 KB variants with 7-byte UID options and 17 pF variants.
+
+The most important clue is ISO14443-4
+
+The line Technologies Supported - MIFARE, ISO14443-3, ISO14443-4 is the biggest practical clue for your Arduino plan.
+
+That means you should not think of this only as a “MIFARE Classic-style sector reader” problem. NXP’s identification note says the MIFARE Plus family supports ISO/IEC 14443-4 (T=CL), and NXP’s MIFARE Plus application note explicitly says that MIFARE Plus in SL1/SL2 can still be activated up to ISO/IEC 14443-4 even when the SAK does not indicate it. In other words, your tag may look partly “Classic-like” at first, but still expect a layer-4 path for some operations.
+
+That materially improves feasibility, because the PN532 can operate as a T=CL / ISO/IEC 14443-4 reader, not just as a simple MIFARE polling device. NXP’s PN532 application note states that in this mode the PN532 behaves as an ISO/IEC 14443-4 reader and can communicate with ISO/IEC 14443-4 cards.
+
+What this means for your project
+
+This pushes the likely architecture in a clearer direction:
+
+More likely than before
+You will be able to detect the tag reliably.
+You will be able to confirm identity and low-level parameters.
+You will probably want a library path that can send raw low-level exchanges, not only “read block N after Classic auth.”
+Less likely to be enough
+A stock Arduino “MIFARE Classic example sketch” by itself may not be sufficient.
+If the useful payload is behind MIFARE Plus auth or AES-secured commands, you may need more than the usual hobby examples. NXP’s public MIFARE Plus documentation discusses SL1/SL3 and AES-authentication flows, which is a much more advanced path than ordinary Classic block reads.
+My updated recommendation
+
+Your new TagInfo dump makes me more confident that buying a PN532 is a sensible first step.
+
+But I would now refine the plan to this:
+
+Choose a PN532 board with a library that exposes raw exchanges, not just high-level NDEF helpers.
+First Arduino milestone should be:
+detect card
+print UID
+print any activation data the library exposes
+try precise version/identity probes
+confirm whether the session can be driven in an ISO14443-4 path
+Only after that should you design the custom “read-my-tag” library.
+The practical takeaway
+
+Before your extra TagInfo details, the project looked like “maybe a proprietary MIFARE layout.”
+
+Now it looks more specifically like:
+
+MIFARE Plus EV1 2K, with ISO14443-4 capability, so your reader library should be chosen for low-level protocol flexibility, not just NDEF or Classic-sector convenience.
+
+That is a better-defined and, in my view, more promising project.
+
+The one remaining major unknown is still the same: whether the interesting application data is readable with keys/permissions you have. But your new data makes the reader choice and software strategy much clearer
