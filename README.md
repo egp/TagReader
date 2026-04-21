@@ -1,99 +1,80 @@
+<!-- README.md v2 -->
 # TCP0532
 
-TCP0532 is an Arduino library skeleton for a PN532-based NFC reader project focused on identifying and eventually reading a specific **MIFARE Plus EV1** tag.
+TCP0532 is an Arduino library for experimenting with PN532-based NFC readers over the
+TCP1819 bit-banged I2C library.
 
-At this stage, the repository is intentionally small:
+## Status
 
-- standard Arduino library layout
-- CI that compiles the example sketches
-- a thin C++ library skeleton
-- a first example that proves the library wiring and compile path
+This library is currently aimed at a single target board:
 
-## Current scope
+- Arduino UNO R4 WiFi
 
-The immediate goal is to have a clean place to build the project before the hardware arrives.
+The library now has a host-tested foundation for:
 
-Planned early milestones:
+- begin(BBI2C&, uint8_t)
+- configureI2C(uint8_t)
+- wake()
+- getFirmwareVersion(uint32_t&)
+- PN532 host-frame encoding
+- PN532 ACK / response parsing
 
-1. reader alive over I2C
-2. tag detection
-3. UID / version / protocol characterization
-4. transport-layer implementation for PN532
-5. tag-specific probing and read experiments
+Hardware validation with the actual PN532 module is still the next major milestone.
+
+## Dependency
+
+TCP0532 depends on:
+
+- TCP1819
+
+## Build and test
+
+Host tests:
+
+make clean test
+
+Arduino compile check:
+
+make clean compile-all
+
+CI compiles the example for:
+
+- arduino:renesas_uno:unor4wifi
+
+and also runs the host tests.
+
+## Example sketch layout
+
+examples/ReaderAlive/ReaderAlive.ino intentionally uses:
+
+#include "src/TCP0532.h"
+
+This is deliberate.
+
+The example is intended to compile while living in the examples/ReaderAlive/
+directory with a sketch-local symlink:
+
+examples/ReaderAlive/src -> ../../src
+
+That keeps development simple before the first release and may remain the permanent
+workflow for the example sketch.
+
+## Current example
+
+ReaderAlive is still a minimal bring-up sketch. It is intentionally conservative and
+has not yet been rewritten into a hardware-focused demo.
 
 ## Repository layout
 
-```text
-TCP0532/
-├── .github/workflows/ci.yml
-├── examples/
-│   └── ReaderAlive/
-├── src/
-│   ├── TCP0532.cpp
-│   └── TCP0532.h
-├── .gitignore
-├── keywords.txt
-├── library.properties
-├── LICENSE
-├── Makefile
-└── README.md
-```
+- src/ — library sources
+- examples/ReaderAlive/ — example sketch
+- tests/host/ — host-side BB/WB tests
+- .github/workflows/ci.yml — CI
 
-## Local build prerequisites
+## Notes on testing
 
-- Arduino CLI installed
-- the relevant cores installed for the boards you want to compile against
+The current host tests use a local fake transport in tests/host/test_support/.
 
-Examples:
-
-```bash
-arduino-cli core update-index
-arduino-cli core install arduino:avr
-arduino-cli core install arduino:renesas_uno
-```
-
-## Local compile examples
-
-Default board:
-
-```bash
-make compile
-```
-
-Specific board:
-
-```bash
-make compile FQBN=arduino:renesas_uno:minima
-make compile FQBN=arduino:renesas_uno:unor4wifi
-```
-
-Compile all configured boards:
-
-```bash
-make compile-all
-```
-
-## Example sketch
-
-`examples/ReaderAlive/ReaderAlive.ino` is only a bootstrap sketch.
-It does **not** talk to the PN532 yet.
-It simply proves:
-
-- the library structure is valid
-- the example compiles
-- the starter API shape is in place
-
-## Design intent
-
-The long-term code split should stay clean:
-
-- `TCP0532`: transport / board-facing wrapper
-- PN532 protocol helpers
-- MIFARE Plus EV1 probing/auth logic
-- tag-specific parsing logic
-
-That way, the tag-specific logic does not get welded directly into the transport layer.
-
-## License
-
-MIT
+A likely future improvement is to move the reusable scripted bus mock into the TCP1819
+repository so multiple TCP* libraries can share the same host-side bus test machinery.
+<!-- README.md v2 -->

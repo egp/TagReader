@@ -1,5 +1,7 @@
-// tests/host/test_support/FakeTcp1819.cpp v4
+// tests/host/test_support/FakeTcp1819.cpp v5
 #include "FakeTcp1819.h"
+
+#include "TCP0532Transport.h"
 
 #include <stddef.h>
 
@@ -102,20 +104,20 @@ size_t fakeTcp1819LastWriteLength() {
   return gLastWriteLength;
 }
 
-bool tcp0532HostBeginBus(BBI2C& bus) {
+bool tcp0532TransportBeginBus(BBI2C& bus) {
   (void)bus;
   ++gBeginCallCount;
   return gBeginResult;
 }
 
-bool tcp0532HostWakeDevice(BBI2C& bus, uint8_t address) {
+bool tcp0532TransportWakeDevice(BBI2C& bus, uint8_t address) {
   (void)bus;
   ++gWakeCallCount;
   gLastWakeAddress = address;
   return gWakeResult;
 }
 
-bool tcp0532HostWrite(BBI2C& bus, uint8_t address, const uint8_t* data, size_t len) {
+bool tcp0532TransportWrite(BBI2C& bus, uint8_t address, const uint8_t* data, size_t len) {
   (void)bus;
   (void)data;
   ++gWriteCallCount;
@@ -124,7 +126,7 @@ bool tcp0532HostWrite(BBI2C& bus, uint8_t address, const uint8_t* data, size_t l
   return gWriteResult;
 }
 
-bool tcp0532HostRead(BBI2C& bus, uint8_t address, uint8_t* data, size_t len) {
+bool tcp0532TransportRead(BBI2C& bus, uint8_t address, uint8_t* data, size_t len) {
   (void)bus;
   (void)address;
   ++gReadCallCount;
@@ -155,4 +157,4 @@ bool tcp0532HostRead(BBI2C& bus, uint8_t address, uint8_t* data, size_t len) {
   }
   return true;
 }
-// tests/host/test_support/FakeTcp1819.cpp v4
+// tests/host/test_support/FakeTcp1819.cpp v5

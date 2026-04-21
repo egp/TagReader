@@ -1,17 +1,12 @@
-// src/TCP0532.h v5
+// src/TCP0532.h v6
 #pragma once
 
 #if defined(ARDUINO)
 #include <Arduino.h>
 #include <TCP1819.h>
 #else
-#include <stddef.h>
 #include <stdint.h>
 struct BBI2C;
-bool tcp0532HostBeginBus(BBI2C& bus);
-bool tcp0532HostWakeDevice(BBI2C& bus, uint8_t address);
-bool tcp0532HostWrite(BBI2C& bus, uint8_t address, const uint8_t* data, size_t len);
-bool tcp0532HostRead(BBI2C& bus, uint8_t address, uint8_t* data, size_t len);
 #endif
 
 static constexpr uint8_t TCP0532_DEFAULT_I2C_ADDRESS = 0x24;
@@ -37,4 +32,4 @@ class TCP0532 {
   const char* lastError_;
   bool ready_;
 };
-// src/TCP0532.h v5
+// src/TCP0532.h v6

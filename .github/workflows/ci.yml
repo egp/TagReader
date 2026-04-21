@@ -1,4 +1,8 @@
-# .github/workflows/ci.yml v3
+
+### `.github/workflows/ci.yml`
+
+```yaml
+# .github/workflows/ci.yml v4
 name: CI
 
 on:
@@ -33,26 +37,13 @@ jobs:
       - name: Install Renesas UNO core
         run: arduino-cli core install arduino:renesas_uno
 
-      - name: Compile ReaderAlive for UNO R4 WiFi
-        working-directory: TCP0532
-        run: |
-          arduino-cli compile \
-            --fqbn arduino:renesas_uno:unor4wifi \
-            --library . \
-            --library ../TCP1819 \
-            examples/ReaderAlive
-
-  host-tests:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out TCP0532
-        uses: actions/checkout@v4
-        with:
-          path: TCP0532
-
       - name: Run host tests
         working-directory: TCP0532
         run: |
           make clean test
-# .github/workflows/ci.yml v3
+
+      - name: Compile ReaderAlive for UNO R4 WiFi
+        working-directory: TCP0532
+        run: |
+          make clean compile-all TCP1819_DIR=../TCP1819
+# .github/workflows/ci.yml v4

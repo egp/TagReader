@@ -1,8 +1,9 @@
-// src/TCP0532.cpp v10
+// src/TCP0532.cpp v11
 #include "TCP0532.h"
 
 #include "TCP0532Frame.h"
 #include "TCP0532Parse.h"
+#include "TCP0532Transport.h"
 
 TCP0532::TCP0532()
     : bus_(nullptr),
@@ -15,12 +16,7 @@ bool TCP0532::begin(BBI2C& bus, uint8_t address) {
   i2cAddress_ = address;
   ready_ = false;
 
-#if defined(ARDUINO)
-  const bool transportReady = true;
-#else
-  const bool transportReady = tcp0532HostBeginBus(bus);
-#endif
-
+  const bool transportReady = tcp0532TransportBeginBus(bus);
   if (!transportReady) {
     setError("begin failed");
     return false;
@@ -49,12 +45,7 @@ bool TCP0532::wake() {
     return false;
   }
 
-#if defined(ARDUINO)
-  const bool wakeOk = true;
-#else
-  const bool wakeOk = tcp0532HostWakeDevice(*bus_, i2cAddress_);
-#endif
-
+  const bool wakeOk = tcp0532TransportWakeDevice(*bus_, i2cAddress_);
   if (!wakeOk) {
     setError("wake failed");
     return false;
@@ -82,35 +73,20 @@ bool TCP0532::getFirmwareVersion(uint32_t& version) {
     return false;
   }
 
-#if defined(ARDUINO)
-  const bool writeOk = true;
-#else
-  const bool writeOk = tcp0532HostWrite(*bus_, i2cAddress_, commandFrame, commandFrameLen);
-#endif
-  if (!writeOk) {
+  if (!tcp0532TransportWrite(*bus_, i2cAddress_, commandFrame, commandFrameLen)) {
     setError("write failed");
     return false;
   }
 
   uint8_t ackFrame[6] = {};
-#if defined(ARDUINO)
-  const bool ackReadOk = true;
-#else
-  const bool ackReadOk = tcp0532HostRead(*bus_, i2cAddress_, ackFrame, sizeof(ackFrame));
-#endif
-  if (!ackReadOk || !tcp0532IsAckFrame(ackFrame, sizeof(ackFrame))) {
+  if (!tcp0532TransportRead(*bus_, i2cAddress_, ackFrame, sizeof(ackFrame)) ||
+      !tcp0532IsAckFrame(ackFrame, sizeof(ackFrame))) {
     setError("ack failed");
     return false;
   }
 
   uint8_t responseFrame[13] = {};
-#if defined(ARDUINO)
-  const bool responseReadOk = true;
-#else
-  const bool responseReadOk =
-      tcp0532HostRead(*bus_, i2cAddress_, responseFrame, sizeof(responseFrame));
-#endif
-  if (!responseReadOk) {
+  if (!tcp0532TransportRead(*bus_, i2cAddress_, responseFrame, sizeof(responseFrame))) {
     setError("response failed");
     return false;
   }
@@ -154,4 +130,4 @@ void TCP0532::setError(const char* message) {
   lastError_ = message;
   ready_ = false;
 }
-// src/TCP0532.cpp v10
+// src/TCP0532.cpp v11

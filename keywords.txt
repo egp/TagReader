@@ -1,13 +1,17 @@
+# keywords.txt v2
+#######################################
 # Syntax Coloring Map For TCP0532
+#######################################
 
-# Datatypes (KEYWORD1)
 TCP0532	KEYWORD1
 
-# Methods and Functions (KEYWORD2)
 begin	KEYWORD2
 configureI2C	KEYWORD2
+wake	KEYWORD2
+getFirmwareVersion	KEYWORD2
 isReady	KEYWORD2
 lastError	KEYWORD2
+i2cAddress	KEYWORD2
 
-# Constants (LITERAL1)
 TCP0532_DEFAULT_I2C_ADDRESS	LITERAL1
+# keywords.txt v2
