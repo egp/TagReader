@@ -1,4 +1,4 @@
-# .github/workflows/ci.yml v2
+# .github/workflows/ci.yml v3
 name: CI
 
 on:
@@ -9,13 +9,6 @@ on:
 jobs:
   compile-examples:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        fqbn:
-          - arduino:avr:uno
-          - arduino:renesas_uno:minima
-          - arduino:renesas_uno:unor4wifi
 
     steps:
       - name: Check out TCP0532
@@ -37,17 +30,14 @@ jobs:
       - name: Update core index
         run: arduino-cli core update-index
 
-      - name: Install AVR core
-        run: arduino-cli core install arduino:avr
-
       - name: Install Renesas UNO core
         run: arduino-cli core install arduino:renesas_uno
 
-      - name: Compile ReaderAlive
+      - name: Compile ReaderAlive for UNO R4 WiFi
         working-directory: TCP0532
         run: |
           arduino-cli compile \
-            --fqbn "${{ matrix.fqbn }}" \
+            --fqbn arduino:renesas_uno:unor4wifi \
             --library . \
             --library ../TCP1819 \
             examples/ReaderAlive
@@ -65,4 +55,4 @@ jobs:
         working-directory: TCP0532
         run: |
           make clean test
-# .github/workflows/ci.yml v2
+# .github/workflows/ci.yml v3

@@ -1,4 +1,4 @@
-# Makefile v6
+# Makefile v7
 ARDUINO_CLI ?= arduino-cli
 CXX ?= c++
 CXXFLAGS ?= -std=c++17 -Wall -Wextra -Werror -pedantic
@@ -6,13 +6,11 @@ CXXFLAGS ?= -std=c++17 -Wall -Wextra -Werror -pedantic
 LIBRARY_DIR ?= .
 TCP1819_DIR ?=
 EXAMPLE ?= examples/ReaderAlive
-FQBN ?= arduino:avr:uno
+FQBN ?= arduino:renesas_uno:unor4wifi
 BUILD_DIR ?= build
 HOST_BUILD_DIR ?= build/host
 
 ALL_FQBNS := \
-	arduino:avr:uno \
-	arduino:renesas_uno:minima \
 	arduino:renesas_uno:unor4wifi
 
 HOST_TEST_SOURCES := $(sort $(wildcard tests/host/test_*.cpp))
@@ -20,7 +18,7 @@ HOST_TEST_SUPPORT_SOURCES := $(sort $(wildcard tests/host/test_support/*.cpp))
 HOST_LIBRARY_SOURCES := $(sort $(wildcard src/*.cpp))
 HOST_TEST_BINS := $(patsubst tests/host/%.cpp,$(HOST_BUILD_DIR)/%,$(HOST_TEST_SOURCES))
 
-.PHONY: help compile compile-all test clean core-update core-install-avr core-install-renesas
+.PHONY: help compile compile-all test clean core-update core-install-renesas
 
 help:
 	@echo "Targets:"
@@ -29,12 +27,11 @@ help:
 	@echo "  make test               Build and run host tests"
 	@echo "  make clean              Remove build artifacts"
 	@echo "  make core-update        Run arduino-cli core update-index"
-	@echo "  make core-install-avr   Install arduino:avr"
 	@echo "  make core-install-renesas Install arduino:renesas_uno"
 	@echo
 	@echo "Variables:"
 	@echo "  EXAMPLE=<path>          default: examples/ReaderAlive"
-	@echo "  FQBN=<fqbn>             default: arduino:avr:uno"
+	@echo "  FQBN=<fqbn>             default: arduino:renesas_uno:unor4wifi"
 	@echo "  TCP1819_DIR=<path>      optional extra library path"
 
 compile:
@@ -78,9 +75,6 @@ clean:
 core-update:
 	$(ARDUINO_CLI) core update-index
 
-core-install-avr:
-	$(ARDUINO_CLI) core install arduino:avr
-
 core-install-renesas:
 	$(ARDUINO_CLI) core install arduino:renesas_uno
-# Makefile v6
+# Makefile v7
